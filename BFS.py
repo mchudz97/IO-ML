@@ -1,20 +1,16 @@
 import math
 
 
-
-
 class Node:
 
     def __init__(self, pos: []):
-
         self.position = pos
         self.neighbors = []
         self.visited = False
 
     def is_neighbor_of(self, node):
-
-        if math.sqrt((self.position[0]-node.position[0])**2
-                     + ((self.position[1])-node.position[1])**2) == 1:
+        if math.sqrt((self.position[0] - node.position[0]) ** 2
+                     + ((self.position[1]) - node.position[1]) ** 2) == 1:
             return True
 
         return False
@@ -43,7 +39,7 @@ class BFS:
                 elif self.maze[line][char] == 'E':
                     self.end_node = Node([char, line])
                     self.nodes.append(self.end_node)
-                elif  self.maze[line][char] == ' ':
+                elif self.maze[line][char] == ' ':
                     self.nodes.append(Node([char, line]))
 
     def set_neighbors(self):
@@ -54,7 +50,6 @@ class BFS:
 
     def print_path(self):
 
-
         path_array: [] = self.maze.copy()
         path_array = [list(sting) for sting in path_array]
         for i in self.nodes:
@@ -63,6 +58,8 @@ class BFS:
 
         for x in path_array:
             print(*x)
+
+        print()
 
     def run(self):
 

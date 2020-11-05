@@ -3,11 +3,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 import math
 
+from AStar import AStar
 from BFS import BFS
 from MazeReader import MazeReader
 import random
 
-PENALTY = -1
+PENALTY = -2
 
 
 class MazeGA:
@@ -143,9 +144,9 @@ def generate_charts(ga : pyeasyga.GeneticAlgorithm):
 
 r = MazeReader('m3.txt')
 mga = MazeGA(r.board, r.steps)
-pga = pyeasyga.GeneticAlgorithm(mga, population_size=2000,
-                                elitism=True, mutation_probability=1,
-                                generations=100, crossover_probability=1)
+pga = pyeasyga.GeneticAlgorithm(mga, population_size=5000,
+                                elitism=True, mutation_probability=.5,
+                                generations=100, crossover_probability=.5)
 pga.fitness_function = fitness_v1
 pga.crossover_function = my_crossover
 
@@ -153,4 +154,6 @@ generate_charts(pga)
 print_path(mga, pga.current_generation[0])
 bfs = BFS(mga.maze)
 bfs.run()
+ast = AStar(mga.maze)
+ast.run()
 
