@@ -2,6 +2,8 @@ from pyeasyga import pyeasyga
 import numpy as np
 import matplotlib.pyplot as plt
 import math
+
+from BFS import BFS
 from MazeReader import MazeReader
 import random
 
@@ -92,7 +94,7 @@ def fitness_v1(individual, maze: MazeGA):
     for i in range(int(len(individual)/2) - 1):
         score += maze.move(individual[2*i], individual[2*i+1], maze.current_position)
         if maze.get_distance_to_end(maze.current_position[0], maze.current_position[1]) == 0:
-            score += 2 * maze.max_steps / i
+            score += maze.max_steps **2 / (i+1)
             break
     score -= maze.get_distance_to_end(maze.current_position[0], maze.current_position[1])
 
@@ -104,7 +106,7 @@ def print_path(mga_obj: MazeGA, chromosome: pyeasyga.Chromosome):
     pos = mga_obj.start_position.copy()
     path_array: [] = mga_obj.maze.copy()
     path_array = [list(sting) for sting in path_array]
-
+    print()
     for i in range(int(len(chromosome.genes) / 2) - 1):
         mga_obj.move(chromosome.genes[2*i], chromosome.genes[2*i+1], pos)
         path_array[pos[1]][pos[0]] = 'o'
@@ -114,6 +116,7 @@ def print_path(mga_obj: MazeGA, chromosome: pyeasyga.Chromosome):
     for x in path_array:
         print(*x)
 
+    print()
 
 def generate_charts(ga : pyeasyga.GeneticAlgorithm):
 
@@ -140,10 +143,14 @@ def generate_charts(ga : pyeasyga.GeneticAlgorithm):
 
 r = MazeReader('m3.txt')
 mga = MazeGA(r.board, r.steps)
-pga = pyeasyga.GeneticAlgorithm(mga, population_size=2000, elitism=True, mutation_probability=.5, generations=100)
+pga = pyeasyga.GeneticAlgorithm(mga, population_size=2000,
+                                elitism=True, mutation_probability=1,
+                                generations=100, crossover_probability=1)
 pga.fitness_function = fitness_v1
 pga.crossover_function = my_crossover
 
 generate_charts(pga)
 print_path(mga, pga.current_generation[0])
+bfs = BFS(mga.maze)
+bfs.run()
 
