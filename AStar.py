@@ -78,9 +78,9 @@ class AStar:
                     n.parent = best_choice
                     n.count_functions(self.end_node)
 
-        self.print_path()
+        self.print_visited()
 
-    def print_path(self):
+    def print_visited(self):
 
         path_array: [] = self.maze.copy()
         path_array = [list(sting) for sting in path_array]

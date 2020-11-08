@@ -8,7 +8,7 @@ from BFS import BFS
 from MazeReader import MazeReader
 import random
 
-PENALTY = -2
+PENALTY = 1
 
 
 class MazeGA:
@@ -93,14 +93,35 @@ def fitness_v1(individual, maze: MazeGA):
     score = 0
     maze.current_position = maze.start_position.copy()
     for i in range(int(len(individual)/2) - 1):
-        score += maze.move(individual[2*i], individual[2*i+1], maze.current_position)
+        maze.move(individual[2*i], individual[2*i+1], maze.current_position)
         if maze.get_distance_to_end(maze.current_position[0], maze.current_position[1]) == 0:
-            score += maze.max_steps **2 / (i+1)
-            break
+            return 0
     score -= maze.get_distance_to_end(maze.current_position[0], maze.current_position[1])
 
     return score
 
+
+def fitness_v2(individual, maze: MazeGA):
+
+    score = 0
+    prev_pos = []
+    maze.current_position = maze.start_position.copy()
+    for i in range(int(len(individual)/2) - 1):
+        inc_pos = maze.current_position.copy()
+        maze.move(individual[2*i], individual[2*i+1], inc_pos)
+
+        for pos in prev_pos:
+            if pos == inc_pos:
+                score -= PENALTY
+                continue
+        prev_pos.append(maze.current_position.copy())
+        maze.current_position = inc_pos
+        if maze.get_distance_to_end(maze.current_position[0], maze.current_position[1]) == 0:
+            return 0
+
+    score -= maze.get_distance_to_end(maze.current_position[0], maze.current_position[1])
+
+    return score
 
 def print_path(mga_obj: MazeGA, chromosome: pyeasyga.Chromosome):
 
@@ -144,10 +165,10 @@ def generate_charts(ga : pyeasyga.GeneticAlgorithm):
 
 r = MazeReader('m3.txt')
 mga = MazeGA(r.board, r.steps)
-pga = pyeasyga.GeneticAlgorithm(mga, population_size=5000,
-                                elitism=True, mutation_probability=.5,
-                                generations=100, crossover_probability=.5)
-pga.fitness_function = fitness_v1
+pga = pyeasyga.GeneticAlgorithm(mga, population_size=500,
+                                elitism=True, mutation_probability=1,
+                                generations=50)
+pga.fitness_function = fitness_v2
 pga.crossover_function = my_crossover
 
 generate_charts(pga)

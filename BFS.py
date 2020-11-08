@@ -48,7 +48,7 @@ class BFS:
             for y in self.nodes:
                 if y.is_neighbor_of(x): x.neighbors.append(y)
 
-    def print_path(self):
+    def print_visited(self):
 
         path_array: [] = self.maze.copy()
         path_array = [list(sting) for sting in path_array]
@@ -75,4 +75,4 @@ class BFS:
                     if not p.visited:
                         self.queue.append(p)
 
-        self.print_path()
+        self.print_visited()
