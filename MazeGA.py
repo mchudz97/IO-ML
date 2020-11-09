@@ -1,3 +1,5 @@
+from time import time_ns
+
 from pyeasyga import pyeasyga
 import numpy as np
 import matplotlib.pyplot as plt
@@ -106,16 +108,22 @@ def fitness_v2(individual, maze: MazeGA):
     score = 0
     prev_pos = []
     maze.current_position = maze.start_position.copy()
+    prev_pos.append(maze.current_position.copy())
+
     for i in range(int(len(individual)/2) - 1):
         inc_pos = maze.current_position.copy()
         maze.move(individual[2*i], individual[2*i+1], inc_pos)
-
+        is_in = False
         for pos in prev_pos:
             if pos == inc_pos:
                 score -= PENALTY
-                continue
-        prev_pos.append(maze.current_position.copy())
+                is_in = True
+                break
+        if is_in:
+            continue
+        prev_pos.append(inc_pos.copy())
         maze.current_position = inc_pos
+
         if maze.get_distance_to_end(maze.current_position[0], maze.current_position[1]) == 0:
             return 0
 
@@ -123,17 +131,42 @@ def fitness_v2(individual, maze: MazeGA):
 
     return score
 
-def print_path(mga_obj: MazeGA, chromosome: pyeasyga.Chromosome):
+
+def print_path(mga_obj: MazeGA, chromosome: pyeasyga.Chromosome, fitness_type):
 
     pos = mga_obj.start_position.copy()
     path_array: [] = mga_obj.maze.copy()
     path_array = [list(sting) for sting in path_array]
     print()
-    for i in range(int(len(chromosome.genes) / 2) - 1):
-        mga_obj.move(chromosome.genes[2*i], chromosome.genes[2*i+1], pos)
-        path_array[pos[1]][pos[0]] = 'o'
-        if mga_obj.get_distance_to_end(pos[0], pos[1]) == 0:
-            break
+    if fitness_type == fitness_v1:
+
+        for i in range(int(len(chromosome.genes) / 2) - 1):
+            mga_obj.move(chromosome.genes[2*i], chromosome.genes[2*i+1], pos)
+            path_array[pos[1]][pos[0]] = 'o'
+            if mga_obj.get_distance_to_end(pos[0], pos[1]) == 0:
+                break
+
+    elif fitness_type == fitness_v2:
+
+        prev_pos = [pos.copy()]
+        for i in range(int(len(chromosome.genes) / 2) - 1):
+            inc_pos = pos.copy()
+            mga_obj.move(chromosome.genes[2*i], chromosome.genes[2*i+1], inc_pos)
+
+            is_in = False
+            for p in prev_pos:
+                if p == inc_pos:
+                    is_in = True
+                    break
+            if is_in:
+                continue
+            prev_pos.append(inc_pos.copy())
+
+            pos = inc_pos
+            path_array[pos[1]][pos[0]] = 'o'
+            if mga_obj.get_distance_to_end(pos[0], pos[1]) == 0:
+                break
+
 
     for x in path_array:
         print(*x)
@@ -144,15 +177,20 @@ def generate_charts(ga : pyeasyga.GeneticAlgorithm):
 
     all_vals = []
     best_vals = []
+    start = time_ns()
     ga.create_first_generation()
     all_vals.append([x.fitness for x in ga.current_generation])
     best_vals.append(ga.current_generation[0].fitness)
 
     for _ in range(1, ga.generations):
+
+        if ga.current_generation[0].fitness == 0:
+            break
         ga.create_next_generation()
         all_vals.append([x.fitness for x in ga.current_generation])
         best_vals.append(ga.current_generation[0].fitness)
 
+    print(f'\nin {(time_ns() - start) / 1000000}ms')
     avg = [np.average(x) for x in all_vals]
     fig, ax = plt.subplots()
     ax.plot(best_vals, label="Max")
@@ -162,19 +200,22 @@ def generate_charts(ga : pyeasyga.GeneticAlgorithm):
     legend = ax.legend(loc='lower right')
     plt.show()
 
-
-r = MazeReader('m3.txt')
+r = MazeReader('m4.txt')
 mga = MazeGA(r.board, r.steps)
-pga = pyeasyga.GeneticAlgorithm(mga, population_size=500,
-                                elitism=True, mutation_probability=1,
+pga = pyeasyga.GeneticAlgorithm(mga, population_size=5000,
+                                elitism=True,
+                                mutation_probability=.1,
                                 generations=50)
 pga.fitness_function = fitness_v2
 pga.crossover_function = my_crossover
 
-generate_charts(pga)
-print_path(mga, pga.current_generation[0])
 bfs = BFS(mga.maze)
 bfs.run()
+
 ast = AStar(mga.maze)
 ast.run()
+
+generate_charts(pga)
+print_path(mga, pga.current_generation[0], pga.fitness_function)
+
 

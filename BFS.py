@@ -1,19 +1,6 @@
-import math
+from time import time_ns
 
-
-class Node:
-
-    def __init__(self, pos: []):
-        self.position = pos
-        self.neighbors = []
-        self.visited = False
-
-    def is_neighbor_of(self, node):
-        if math.sqrt((self.position[0] - node.position[0]) ** 2
-                     + ((self.position[1]) - node.position[1]) ** 2) == 1:
-            return True
-
-        return False
+from Node import Node
 
 
 class BFS:
@@ -63,6 +50,7 @@ class BFS:
 
     def run(self):
 
+        start = time_ns()
         while len(self.queue) != 0:
             if self.end_node in self.queue:
                 self.end_node.visited = True
@@ -74,5 +62,5 @@ class BFS:
                 for p in popped.neighbors:
                     if not p.visited:
                         self.queue.append(p)
-
+        print(f'\nin {(time_ns() - start) / 1000000}ms')
         self.print_visited()

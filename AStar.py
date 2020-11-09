@@ -1,37 +1,10 @@
+import datetime
 import math
+
 from operator import attrgetter
+from time import time_ns
 
-
-class ANode:
-
-    def __init__(self, position: []):
-        self.position = position
-        self.g = 0
-        self.f = 0
-        self.h = 0
-        self.visited = False
-        self.parent = None
-        self.neighbors = []
-
-    def is_neighbor_of(self, node):
-
-        if math.sqrt((self.position[0]-node.position[0])**2
-                     + ((self.position[1])-node.position[1])**2) == 1:
-            return True
-
-        return False
-
-    def count_functions(self, end_node):
-
-        #self.g = math.sqrt((start_node.position[0] - self.position[0]) ** 2
-        #                   + (start_node.position[1] - self.position[1]) ** 2)
-        #self.h = math.sqrt((end_node.position[0] - self.position[0]) ** 2
-        #                   + (end_node.position[1] - self.position[1]) ** 2)
-
-        self.g = self.parent.g +1
-        self.h = abs(end_node.position[0] - self.position[0]) + abs(end_node.position[1] - self.position[1])
-
-        self.f = self.g + self.h
+from Node import ANode
 
 
 class AStar:
@@ -64,10 +37,12 @@ class AStar:
 
         for x in self.nodes:
             for y in self.nodes:
-                if y.is_neighbor_of(x): x.neighbors.append(y)
+                if y.is_neighbor_of(x):
+                    x.neighbors.append(y)
 
     def run(self):
 
+        start = time_ns()
         while len(self.queue) > 0 and self.end_node.visited is not True:
             best_choice = min(self.queue, key=attrgetter('f'))
             best_choice.visited = True
@@ -78,6 +53,7 @@ class AStar:
                     n.parent = best_choice
                     n.count_functions(self.end_node)
 
+        print(f'\nin {(time_ns() - start)/1000 }ms')
         self.print_visited()
 
     def print_visited(self):
