@@ -57,7 +57,7 @@ class BFS:
                 break
 
             else:
-                popped = self.queue.pop()
+                popped = self.queue.pop(0)
                 popped.visited = True
                 for p in popped.neighbors:
                     if not p.visited:
