@@ -53,7 +53,7 @@ class AStar:
                     n.parent = best_choice
                     n.count_functions(self.end_node)
 
-        print(f'\nin {(time_ns() - start)/1000 }ms')
+        print(f'\nin {(time_ns() - start)/1000000 }ms')
         self.print_visited()
 
     def print_visited(self):
